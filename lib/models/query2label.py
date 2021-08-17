@@ -64,18 +64,31 @@ class Qeruy2Label(nn.Module):
         # assert not (self.ada_fc and self.emb_fc), "ada_fc and emb_fc cannot be True at the same time."
         
         hidden_dim = transfomer.d_model
+        # 对于backbone 提取的特征进行线性映射
         self.input_proj = nn.Conv2d(backbone.num_channels, hidden_dim, kernel_size=1)
-        self.query_embed = nn.Embedding(num_class, hidden_dim)
+        self.query_embed = nn.Embedding(num_class, hidden_dim)  # label embedding, 随机初始化得到
         self.fc = GroupWiseLinear(num_class, hidden_dim, bias=True)
 
 
     def forward(self, input):
         src, pos = self.backbone(input)
-        src, pos = src[-1], pos[-1]
-        # import ipdb; ipdb.set_trace()
 
+        print("len src",len(src))
+        print("len pos",len(pos))
+        # src 是backbone 返回的feature 信息
+        # pos 是position embedding
+        # src.shape torch.Size([1, 2048, 14, 14])   fea 是 2048 维向量
+        # pos.shape torch.Size([1, 128, 14, 14])    embedding 是 128维向量
+        src, pos = src[-1], pos[-1]      # 只返回最后一层的信息
+
+        # import ipdb; ipdb.set_trace()
+        # print("query2Label.py: 76")
+        # print("src.shape",src.shape)
+        # print("pos.shape",pos.shape)
+        # exit()
         query_input = self.query_embed.weight
         hs = self.transformer(self.input_proj(src), query_input, pos)[0] # B,K,d
+
         out = self.fc(hs[-1])
         # import ipdb; ipdb.set_trace()
         return out
@@ -106,8 +119,8 @@ def build_q2l(args):
     if not args.keep_input_proj:
         model.input_proj = nn.Identity()
         print("set model.input_proj to Indentify!")
-    
+
 
     return model
-        
+
         

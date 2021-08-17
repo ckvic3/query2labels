@@ -64,6 +64,9 @@ def parser_args():
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                         help='use pre-trained model. default is False. ')
 
+    # loss function
+    parser.add_argument('--gamma_neg', default=4)
+    parser.add_argument('--gamma-pos', default=0)
     parser.add_argument('--eps', default=1e-5, type=float,
                     help='eps for focal loss (default: 1e-5)')
 
@@ -128,7 +131,7 @@ best_mAP = 0
 
 def main():
     args = get_args()
-    
+    print("args:",args.gamma_neg)
     if 'WORLD_SIZE' in os.environ:
         assert args.world_size > 0, 'please set --world-size and --rank in the command line'
         # launch by torch.distributed.launch
@@ -373,4 +376,10 @@ def kill_process(filename:str, holdpid:int) -> List[str]:
     return idlist
 
 if __name__ == '__main__':
-    main()
+    # main()
+
+    args = get_args()
+    model = build_q2l(args)
+    input = torch.rand(size=[1,3,448,448])
+    output = model(input)
+    print(output.shape)

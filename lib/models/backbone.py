@@ -102,7 +102,10 @@ class BackboneBase(nn.Module):
 
 
 class Backbone(BackboneBase):
-    """ResNet backbone with frozen BatchNorm."""
+    """ResNet backbone with frozen BatchNorm.
+    why we need use frozen BatchNorm in ResNet?
+    https://github.com/facebookresearch/maskrcnn-benchmark/issues/267
+    """
     def __init__(self, name: str,
                  train_backbone: bool,
                  return_interm_layers: bool,
@@ -208,7 +211,7 @@ def build_backbone(args):
         backbone.forward = backbone.forward_features
         backbone.cls_token = False
         del backbone.head
-    else:
+    else:       #  针对resnet 等框架
         return_interm_layers = False
         backbone = Backbone(args.backbone, train_backbone, return_interm_layers, False, args.pretrained)
         bb_num_channels = backbone.num_channels

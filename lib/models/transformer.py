@@ -206,6 +206,7 @@ class TransformerEncoderLayer(nn.Module):
     def with_pos_embed(self, tensor, pos: Optional[Tensor]):
         return tensor if pos is None else tensor + pos
 
+    # 常规的操作， layernorm 放置在操作之后 ， 需要细致化调参来引导模型正确收敛
     def forward_post(self,
                      src,
                      src_mask: Optional[Tensor] = None,
@@ -222,7 +223,9 @@ class TransformerEncoderLayer(nn.Module):
         src = src + self.dropout2(src2)
         src = self.norm2(src)
         return src
-
+    # paper: On Layer Normalization in the Transformer Architecture
+    # https://arxiv.org/abs/2002.04745
+    # 把 norm 放到运算之前，可以加快训练速度，减少一些调参工作
     def forward_pre(self, src,
                     src_mask: Optional[Tensor] = None,
                     src_key_padding_mask: Optional[Tensor] = None,
