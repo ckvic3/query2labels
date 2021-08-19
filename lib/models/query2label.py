@@ -12,9 +12,9 @@ import torch.distributed as dist
 import numpy as np
 import math
 
-from models.backbone import build_backbone
-from models.transformer import build_transformer
-from utils.misc import clean_state_dict
+from lib.models.backbone import build_backbone
+from lib.models.transformer import build_transformer
+from lib.utils.misc import clean_state_dict
 
 class GroupWiseLinear(nn.Module):
     # could be changed to: 
@@ -69,12 +69,15 @@ class Qeruy2Label(nn.Module):
         self.query_embed = nn.Embedding(num_class, hidden_dim)  # label embedding, 随机初始化得到
         self.fc = GroupWiseLinear(num_class, hidden_dim, bias=True)
 
+        # add a global fc layer
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.global_fc = nn.Linear(backbone.num_channels, num_class)
 
     def forward(self, input):
         src, pos = self.backbone(input)
 
-        print("len src",len(src))
-        print("len pos",len(pos))
+        # print("len src",len(src))
+        # print("len pos",len(pos))
         # src 是backbone 返回的feature 信息
         # pos 是position embedding
         # src.shape torch.Size([1, 2048, 14, 14])   fea 是 2048 维向量
@@ -90,8 +93,15 @@ class Qeruy2Label(nn.Module):
         hs = self.transformer(self.input_proj(src), query_input, pos)[0] # B,K,d
 
         out = self.fc(hs[-1])
+
+        # add a global trace
+        global_out = self.global_fc(self.avgpool(src).view(src.shape[0],-1))
         # import ipdb; ipdb.set_trace()
-        return out
+        if self.training:
+            return (global_out, out, torch.max(out.float(),global_out.float()))
+        else:
+            return (torch.max(out,global_out))
+
 
     def finetune_paras(self):
         from itertools import chain

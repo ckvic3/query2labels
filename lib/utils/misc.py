@@ -390,6 +390,8 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
         return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
 
 def clean_state_dict(state_dict):
+    """ function to modify state prefix name
+    """
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
         if k[:7] == 'module.':

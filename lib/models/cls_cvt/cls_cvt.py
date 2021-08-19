@@ -16,7 +16,7 @@ from einops.layers.torch import Rearrange
 
 from timm.models.layers import DropPath, trunc_normal_
 
-from utils.slconfig import SLConfig
+from lib.utils.slconfig import SLConfig
 
 __all__ = ['build_CvT']
 

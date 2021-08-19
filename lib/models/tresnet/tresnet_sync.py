@@ -9,7 +9,7 @@ from collections import OrderedDict
 # if fpath not in sys.path:
 #     sys.path.append(fpath)
 
-from models.tresnet.layers.anti_aliasing import AntiAliasDownsampleLayer
+from lib.models.tresnet.layers.anti_aliasing import AntiAliasDownsampleLayer
 # from .layers.anti_aliasing import AntiAliasDownsampleLayer
 from .layers.avg_pool import FastAvgPool2d
 from .layers.general_layers import SEModule, SpaceToDepthModule

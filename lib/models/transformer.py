@@ -77,7 +77,7 @@ class Transformer(nn.Module):
         # print("rm {} layer: {}".format(total_modifie_layer_num, rm_list))
 
     def set_debug_mode(self, status):
-        print("set debug mode to {}!!!".format(status))
+        ("set debug mode to {}!!!".format(status))
         self.debug_mode = status
         if hasattr(self, 'encoder'):
             for idx, layer in enumerate(self.encoder.layers):
